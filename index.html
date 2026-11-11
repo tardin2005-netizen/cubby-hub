@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cubby — central da marca</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* Tokens: sistema de design Cubby (claro / escuro) */
+:root{
+  --display:"Archivo",system-ui,sans-serif;--sans:"IBM Plex Sans",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+  --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-6:24px;--space-8:32px;--space-12:48px;
+  --radius-sm:4px;--radius-md:8px;--radius-lg:14px;
+}
+[data-theme=light]{color-scheme:light;
+  --bg:#F2F4F7;--panel:#FFFFFF;--tx:#0E1726;--mut:#586477;--line:#D6DCE5;--brand:#16284A;--on-brand:#FFFFFF;
+  --acc:#F26B21;--on-acc:#0E1726;--acc-ink:#B8420A;--tape:#FFC83D;--on-tape:#0E1726;--tape-soft:#DEE3EB;--pos:#1D6E64;--caut:#8A5A08;--danger:#B3261E}
+[data-theme=dark]{color-scheme:dark;
+  --bg:#0E1726;--panel:#16284A;--tx:#F2F4F7;--mut:#A9B4C6;--line:#2B3E63;--brand:#8FA8DB;--on-brand:#0E1726;
+  --acc:#FF8A4C;--on-acc:#0E1726;--acc-ink:#FF9A66;--tape:#FFC83D;--on-tape:#0E1726;--tape-soft:#22365C;--pos:#5BC0AE;--caut:#E5B25D;--danger:#FF8A80}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font:400 16px/24px var(--sans);background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.label,.pill,.chip,.eyebrow,.ok,.no{font:600 12px/16px var(--sans);letter-spacing:.08em;text-transform:uppercase}
+.spec{font:500 13px/18px var(--mono)}
+.app{display:grid;grid-template-columns:272px 1fr;height:100vh;transition:grid-template-columns .2s}
+.app.nosb{grid-template-columns:0 1fr}
+.side{background:var(--panel);border-right:1px solid var(--line);overflow:hidden auto;display:flex;flex-direction:column;min-width:0}
+.app.nosb .side{border:0;visibility:hidden}
+.side>*{width:272px;flex-shrink:0}
+.brand{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:var(--space-6) var(--space-4) var(--space-3)}
+#brandLogo{height:38px;width:auto;display:block}
+.brand b{font:800 18px/22px var(--display);letter-spacing:-.01em;display:block}
+.brand small{font:600 11px/14px var(--sans);color:var(--mut);text-transform:uppercase;letter-spacing:.08em}
+#sideMark svg{width:36px;height:36px;display:block}
+#nav{flex:1;padding-bottom:var(--space-3)}
+.item{display:block;padding:8px 14px 8px 48px;color:var(--mut);text-decoration:none;border-radius:var(--radius-md);margin:1px 10px;font-size:14px;line-height:20px}
+.item:hover{background:var(--tape-soft);color:var(--tx)}
+.item.on{background:color-mix(in srgb,var(--cc) 12%,transparent);color:var(--tx);font-weight:600;box-shadow:inset 3px 0 0 var(--cc)}
+.item.home{padding-left:16px;--cc:var(--brand);margin-top:6px}
+.cat{margin:20px 14px 4px;display:flex;align-items:center;gap:var(--space-2)}
+.chev{width:28px;height:28px;border-radius:var(--radius-sm);border:1.5px solid var(--cc);color:var(--cc);display:grid;place-items:center;background:transparent;padding:0}
+.chev svg{transition:transform .18s}
+.cat.closed .chev svg{transform:rotate(-90deg)}
+.chev:hover{background:color-mix(in srgb,var(--cc) 14%,transparent)}
+.pill{border:1.5px solid var(--cc);color:var(--cc);background:color-mix(in srgb,var(--cc) 8%,transparent);border-radius:var(--radius-sm);padding:3px 10px;display:inline-block}
+.side-foot{border-top:1px solid var(--line);padding:var(--space-3) var(--space-4);display:flex;align-items:center;justify-content:space-between;gap:var(--space-2);color:var(--mut)}
+main{min-width:0;overflow:auto;height:100vh}
+.top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3) var(--space-6);background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.icon{width:36px;height:36px;border-radius:var(--radius-md);border:1px solid var(--line);background:var(--panel);display:grid;place-items:center;padding:0}
+.icon:hover{border-color:var(--brand)}
+.crumb{color:var(--mut)}
+.crumb b{color:var(--tx);font-weight:600}
+.spacer{flex:1}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--radius-md);padding:2px;gap:2px;background:var(--panel)}
+.seg button{border:0;background:transparent;padding:4px 12px;border-radius:6px;font:600 12px/16px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.seg button.on{background:var(--brand);color:var(--on-brand)}
+.avatar{width:36px;height:36px;border-radius:var(--radius-md);background:var(--brand);color:var(--on-brand);font:800 13px/36px var(--display);text-align:center;letter-spacing:.02em}
+.proto{margin:var(--space-4) var(--space-8) 0;padding:10px var(--space-4);background:var(--tape-soft);border-radius:var(--radius-md);display:flex;gap:var(--space-3);align-items:center;justify-content:space-between;font-size:14px;line-height:20px;color:var(--mut)}
+.proto>div{display:flex;gap:var(--space-3);align-items:center}
+.proto button{border:0;background:none;color:var(--mut);font-size:18px;padding:0 4px}
+.selo{background:var(--tape);color:var(--on-tape);border-radius:var(--radius-sm);padding:2px 8px;font:600 12px/16px var(--sans);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.ph{padding:var(--space-8) var(--space-8) var(--space-2)}
+.eyebrow{color:var(--acc-ink)}
+.ph h1{font:800 32px/36px var(--display);letter-spacing:-.01em;margin:var(--space-2) 0}
+.ph.hero h1{font:800 56px/56px var(--display);letter-spacing:-.02em;max-width:17ch}
+.ph p{color:var(--mut);max-width:62ch;margin:0}
+.wrap{padding:var(--space-4) var(--space-8) 72px}
+.view{animation:in .25s ease}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+h2{font:700 20px/26px var(--display);margin:var(--space-8) 0 4px}
+h2+p{margin:0 0 var(--space-4);color:var(--mut);font-size:14px;line-height:20px}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--tx);border-radius:var(--radius-md);padding:7px 12px;font:600 13px/18px var(--sans);display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+.btn:hover{border-color:var(--brand)}
+.btn.pri{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
+.btn.pri:hover{filter:brightness(1.12)}
+.btn.m{font:500 13px/18px var(--mono)}
+.btn.danger{color:var(--danger)}
+.btn.danger:hover{border-color:var(--danger)}
+.btn.pri.danger{background:var(--danger);border-color:var(--danger);color:#fff}
+.btn.sm{padding:4px 9px;font-size:12px;line-height:16px}
+.row{display:flex;gap:var(--space-2);flex-wrap:wrap;align-items:center}
+.inp,select.inp,textarea.inp{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:var(--radius-md);padding:9px 11px;color:var(--tx);font:400 15px/22px var(--sans)}
+.inp:focus{outline:0;border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 18%,transparent)}
+label.f{display:grid;gap:5px;font:600 12px/16px var(--sans);text-transform:uppercase;letter-spacing:.08em;color:var(--mut)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-lg);padding:var(--space-4)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:var(--space-4)}
+.tile{aspect-ratio:1;border:1px solid var(--line);background:var(--panel);border-radius:var(--radius-lg);padding:var(--space-4);display:flex;flex-direction:column;justify-content:space-between;text-decoration:none;color:inherit;transition:.18s;position:relative;overflow:hidden}
+.tile:hover{border-color:var(--cc);transform:translateY(-3px)}
+.tile .deco{display:flex;align-items:center;justify-content:center;flex:1;min-height:0}
+.tile .deco svg{width:76px;height:auto;max-height:76px}
+.tile h3{margin:0;font:700 20px/26px var(--display)}
+.tile small{color:var(--mut);font-size:13px;line-height:18px}
+.tile.empty{border:1.5px dashed var(--line);background:transparent;align-items:center;justify-content:center;gap:var(--space-3);color:var(--mut);cursor:default}
+.tile.empty:hover{transform:none;border-color:var(--line)}
+.tile.empty i{display:block;width:30%;aspect-ratio:1;background:var(--acc);border-radius:var(--radius-sm)}
+.sqs{display:grid;grid-template-columns:repeat(2,26px);gap:var(--space-2)}
+.sqs i{width:26px;height:26px;border-radius:var(--radius-sm);display:block;border:1px solid var(--line)}
+.aa{font:800 54px/1 var(--display);letter-spacing:-.03em}
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:var(--space-4)}
+.slot{display:flex;flex-direction:column;gap:var(--space-3)}
+.slot h3{margin:0;font:700 18px/24px var(--display)}
+.slot p{margin:2px 0 0;color:var(--mut);font-size:14px;line-height:20px}
+.stage{height:196px;border-radius:var(--radius-md);display:grid;place-items:center;border:1px solid var(--line);overflow:hidden}
+.stage svg,.stage img{max-width:80%;max-height:72%;width:auto;height:auto}
+.stage svg{width:80%}
+.checker{background-image:linear-gradient(45deg,rgba(128,128,128,.16) 25%,transparent 25%,transparent 75%,rgba(128,128,128,.16) 75%),linear-gradient(45deg,rgba(128,128,128,.16) 25%,transparent 25%,transparent 75%,rgba(128,128,128,.16) 75%);background-size:16px 16px;background-position:0 0,8px 8px}
+.ctl{display:flex;gap:10px;flex-wrap:wrap}
+.warn{margin:0;color:var(--caut);font-size:13px;line-height:18px}
+input[type=file]{display:none}
+.sw{border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;background:var(--panel)}
+.sw .c{height:112px;display:flex;align-items:flex-end;padding:10px;cursor:pointer}
+.sw .b{padding:10px;display:grid;gap:var(--space-2)}
+.sw .hex{display:flex;gap:var(--space-2)}
+.sw input[type=color]{width:40px;height:38px;padding:0;border:1px solid var(--line);border-radius:var(--radius-md);background:none;cursor:pointer}
+.fontcard .big{font-size:46px;line-height:1.05;letter-spacing:-.02em;margin:12px 0 8px;word-break:break-word}
+.rules{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:var(--space-4)}
+.rule{display:flex;flex-direction:column;gap:10px}
+.rule .demo{height:130px;border-radius:var(--radius-md);border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;background:var(--bg)}
+.rule .demo svg{width:70%;height:auto;max-height:80%}
+.rule b{font:700 16px/22px var(--display)}
+.rule span.d{font-size:14px;line-height:20px;color:var(--mut)}
+.ok,.no{padding:2px 8px;border-radius:var(--radius-sm);display:inline-block;width:max-content}
+.ok{color:var(--pos);border:1.5px solid var(--pos)}.no{color:var(--danger);border:1.5px solid var(--danger)}
+.fields{display:grid;gap:var(--space-3);max-width:760px}
+.fld{display:grid;grid-template-columns:1fr auto;gap:var(--space-2);align-items:end}
+.lock{max-width:460px;margin:var(--space-6) auto 0;display:grid;gap:var(--space-4)}
+.lock h3{margin:0;font:800 24px/28px var(--display)}
+.lock p{margin:0;color:var(--mut);font-size:14px;line-height:20px}
+.msg{font-size:14px;color:var(--danger);min-height:20px}
+.vbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:var(--space-4)}
+.vbar .inp{max-width:280px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:var(--space-3)}
+.chip{border:1.5px solid var(--cc,var(--line));color:var(--cc,var(--mut));background:transparent;border-radius:var(--radius-sm);padding:3px 10px}
+.chip.on{background:color-mix(in srgb,var(--cc,var(--tx)) 14%,transparent)}
+.entries{border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--panel);overflow:hidden}
+.entry{display:grid;grid-template-columns:1.3fr 1fr 1.2fr auto;gap:var(--space-4);align-items:center;padding:13px var(--space-4);border-bottom:1px solid var(--line)}
+.entry:last-child{border-bottom:0}
+.entry .tt{font:700 16px/22px var(--display)}
+.entry .sub{color:var(--mut);font-size:13px;line-height:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.entry .pw{word-break:break-all;letter-spacing:.06em}
+.empty{padding:var(--space-12);text-align:center;color:var(--mut)}
+.shelf .it{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:20px}
+.shelf .it:last-child{border:0}
+.shelf .it small{color:var(--mut)}
+dialog{background:var(--panel);color:var(--tx);border:1px solid var(--line);border-radius:var(--radius-lg);padding:0;width:min(520px,92vw)}
+dialog::backdrop{background:rgba(14,23,38,.62)}
+.dlg{padding:var(--space-6);display:grid;gap:var(--space-3)}
+.dlg h3{margin:0;font:800 20px/26px var(--display)}
+.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);background:var(--brand);color:var(--on-brand);padding:9px var(--space-4);border-radius:var(--radius-md);font:600 13px/18px var(--sans);opacity:0;pointer-events:none;transition:.2s;z-index:50}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media(max-width:860px){
+ .app{grid-template-columns:1fr}
+ .side{position:fixed;inset:0 auto 0 0;width:272px;z-index:20;box-shadow:12px 0 40px rgba(0,0,0,.4)}
+ .app.nosb .side{display:none}
+ .ph,.wrap{padding-left:var(--space-4);padding-right:var(--space-4)}.proto{margin-left:var(--space-4);margin-right:var(--space-4)}
+ .entry{grid-template-columns:1fr;gap:6px}
+ .ph.hero h1{font-size:40px;line-height:42px}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <aside class="side" id="side">
+    <div class="brand"><img id="brandLogo" alt="Cubby"><small>central da marca</small></div>
+    <nav id="nav"></nav>
+    <div class="side-foot"><span class="spec" id="vaultState">cofre · bloqueado</span><button class="btn sm" id="btnLock" style="display:none">Bloquear</button><button class="btn sm" id="btnOut">Sair</button></div>
+  </aside>
+  <main>
+    <header class="top">
+      <button class="icon" id="toggleSide" aria-label="Mostrar ou esconder o menu"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+      <div class="crumb label" id="crumb"></div>
+      <div class="spacer"></div>
+      <div class="seg" id="themeSeg"><button data-t="light">Claro</button><button data-t="dark">Escuro</button></div>
+      <span class="avatar" aria-hidden="true">JT</span>
+    </header>
+    <div class="proto" id="protoBar"><div><span class="selo">Protótipo</span><span id="protoTxt"></span></div><button id="protoX" aria-label="Fechar aviso">×</button></div>
+    <section id="view" class="view"></section>
+  </main>
+</div>
+
+<dialog id="dlgAsk"><div class="dlg"><h3>Confirmar</h3><p id="askMsg" style="margin:0;color:var(--mut)"></p><div class="row" style="justify-content:flex-end"><button class="btn" id="askNo">Cancelar</button><button class="btn pri" id="askOk">OK</button></div></div></dialog>
+
+<dialog id="dlgEntry"><form class="dlg" id="entryForm" method="dialog">
+  <h3 id="entryTitle">Nova senha</h3>
+  <label class="f">Serviço / nome<input class="inp" id="eTitle" required placeholder="ex.: Instagram da Cubby"></label>
+  <label class="f">Usuário / e-mail<input class="inp" id="eUser" autocomplete="off"></label>
+  <label class="f">Senha<div class="row" style="flex-wrap:nowrap"><input class="inp" id="ePass" type="password" autocomplete="new-password" required><button type="button" class="btn" id="eShow">ver</button><button type="button" class="btn" id="eGen">gerar</button></div></label>
+  <label class="f">Endereço (URL)<input class="inp" id="eUrl" placeholder="https://"></label>
+  <label class="f">Categoria<select class="inp" id="eCat"></select></label>
+  <label class="f">Notas<textarea class="inp" id="eNotes" rows="3"></textarea></label>
+  <div class="row" style="justify-content:flex-end"><button type="button" class="btn" id="eCancel">Cancelar</button><button class="btn pri" id="eSave">Salvar</button></div>
+</form></dialog>
+
+<div class="toast" id="toast" role="status"></div>
+<script>window.SVGSEEDS={"cubby:reverso-fundo": {"n": "cubby-logotipo-reverso-fundo.svg", "s": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 271 64\" width=\"271\" height=\"64\"><rect width=\"271\" height=\"64\" fill=\"#16284A\"/><g><rect width=\"64\" height=\"64\" rx=\"14\" fill=\"#F2F4F7\"/><rect x=\"9\" y=\"9\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#16284A\"/><rect x=\"35\" y=\"9\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#16284A\"/><rect x=\"9\" y=\"35\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#16284A\"/><rect x=\"36.5\" y=\"36.5\" width=\"17\" height=\"17\" rx=\"4\" fill=\"none\" stroke=\"#F26B21\" stroke-width=\"3\"/></g><path transform=\"translate(82 49)\" d=\"M19.282 0.744Q13.888 0.744 10.106 -1.116Q6.324 -2.976 4.309 -6.789Q2.294 -10.602 2.294 -16.368Q2.294 -22.134 4.34 -25.947Q6.386 -29.759999999999998 10.168 -31.619999999999997Q13.95 -33.48 19.282 -33.48Q22.754 -33.48 25.698999999999998 -32.674Q28.644 -31.868 30.845 -30.194Q33.046 -28.52 34.224000000000004 -25.978Q35.402 -23.436 35.402 -19.902H25.419999999999998Q25.419999999999998 -22.01 24.707 -23.374000000000002Q23.994 -24.738 22.63 -25.42Q21.266 -26.102 19.22 -26.102Q16.864 -26.102 15.407 -25.11Q13.95 -24.118 13.268 -22.195999999999998Q12.586 -20.274 12.586 -17.422V-15.19Q12.586 -12.4 13.268 -10.478Q13.95 -8.556 15.5 -7.595Q17.05 -6.634 19.468 -6.634Q21.576 -6.634 22.971 -7.285Q24.366 -7.936 25.11 -9.331Q25.854 -10.725999999999999 25.854 -12.834H35.402Q35.402 -9.424 34.224000000000004 -6.850999999999999Q33.046 -4.278 30.875999999999998 -2.6039999999999996Q28.706 -0.9299999999999999 25.73 -0.09299999999999997Q22.754 0.744 19.282 0.744Z M52.018 0.744Q46.748000000000005 0.744 43.86500000000001 -2.17Q40.982000000000006 -5.084 40.982000000000006 -11.098V-32.674H51.150000000000006V-12.524Q51.150000000000006 -11.222 51.49100000000001 -10.23Q51.83200000000001 -9.238 52.452000000000005 -8.556Q53.072 -7.874 54.033 -7.564Q54.994 -7.254 56.11000000000001 -7.254Q57.908 -7.254 59.272000000000006 -8.091000000000001Q60.63600000000001 -8.928 61.44200000000001 -10.385000000000002Q62.248000000000005 -11.842 62.248000000000005 -13.578V-32.674H72.416V0.0H64.046L63.426 -4.65H62.992000000000004Q61.876000000000005 -3.038 60.17100000000001 -1.798Q58.46600000000001 -0.558 56.38900000000001 0.09299999999999997Q54.312000000000005 0.744 52.018 0.744Z M99.2 0.744Q96.038 0.744 93.372 -0.5579999999999999Q90.706 -1.8599999999999999 89.094 -4.526H88.66L87.916 0.0H79.608V-44.888H89.776V-29.326H90.148Q91.14 -30.628 92.535 -31.558Q93.93 -32.488 95.666 -32.953Q97.402 -33.418 99.386 -33.418Q103.416 -33.418 106.392 -31.558Q109.368 -29.698 110.97999999999999 -25.947000000000003Q112.592 -22.196 112.592 -16.43Q112.592 -10.54 110.97999999999999 -6.757999999999999Q109.368 -2.976 106.36099999999999 -1.116Q103.354 0.744 99.2 0.744ZM96.038 -7.192Q98.332 -7.192 99.727 -8.091000000000001Q101.122 -8.99 101.74199999999999 -10.788Q102.362 -12.586 102.362 -15.19V-17.36Q102.362 -20.026 101.74199999999999 -21.823999999999998Q101.122 -23.622 99.727 -24.552Q98.332 -25.482 96.038 -25.482Q94.364 -25.482 93.155 -24.862000000000002Q91.946 -24.242 91.17099999999999 -23.126Q90.396 -22.01 90.055 -20.46Q89.714 -18.91 89.714 -17.05V-15.562Q89.714 -13.02 90.365 -11.129Q91.01599999999999 -9.238 92.411 -8.215Q93.806 -7.192 96.038 -7.192Z M137.826 0.744Q134.664 0.744 131.998 -0.5579999999999999Q129.332 -1.8599999999999999 127.72 -4.526H127.286L126.542 0.0H118.23400000000001V-44.888H128.40200000000002V-29.326H128.774Q129.766 -30.628 131.161 -31.558Q132.556 -32.488 134.292 -32.953Q136.028 -33.418 138.012 -33.418Q142.042 -33.418 145.018 -31.558Q147.994 -29.698 149.606 -25.947000000000003Q151.21800000000002 -22.196 151.21800000000002 -16.43Q151.21800000000002 -10.54 149.606 -6.757999999999999Q147.994 -2.976 144.98700000000002 -1.116Q141.98000000000002 0.744 137.826 0.744ZM134.664 -7.192Q136.958 -7.192 138.353 -8.091000000000001Q139.748 -8.99 140.368 -10.788Q140.988 -12.586 140.988 -15.19V-17.36Q140.988 -20.026 140.368 -21.823999999999998Q139.748 -23.622 138.353 -24.552Q136.958 -25.482 134.664 -25.482Q132.99 -25.482 131.781 -24.862000000000002Q130.572 -24.242 129.797 -23.126Q129.022 -22.01 128.68099999999998 -20.46Q128.34 -18.91 128.34 -17.05V-15.562Q128.34 -13.02 128.99099999999999 -11.129Q129.642 -9.238 131.037 -8.215Q132.43200000000002 -7.192 134.664 -7.192Z M162.006 12.214Q159.774 12.214 158.10000000000002 11.873000000000001Q156.42600000000002 11.532 155.744 11.284V4.836H160.02200000000002Q161.758 4.836 162.998 4.061Q164.238 3.286 164.95100000000002 2.201Q165.66400000000002 1.116 165.97400000000002 0.0L153.078 -32.674H163.928L168.764 -18.352Q169.136 -17.36 169.601 -15.779Q170.066 -14.198 170.531 -12.555Q170.996 -10.911999999999999 171.306 -9.61H171.678Q171.92600000000002 -10.478 172.236 -11.625Q172.546 -12.772 172.856 -13.981Q173.166 -15.19 173.507 -16.306Q173.848 -17.422 174.096 -18.29L178.25 -32.674H188.356L177.072 -1.302Q176.018 1.55 174.747 4.03Q173.476 6.51 171.74 8.338999999999999Q170.00400000000002 10.168 167.61700000000002 11.190999999999999Q165.23000000000002 12.214 162.006 12.214Z\" fill=\"#F2F4F7\"/></svg>"}, "cubby:simbolo-c-claro": {"n": "cubby-simbolo-c-claro.svg", "s": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><rect x=\"9\" y=\"9\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#F2F4F7\"/><rect x=\"35\" y=\"9\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#F2F4F7\"/><rect x=\"9\" y=\"35\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#F2F4F7\"/><rect x=\"36.5\" y=\"36.5\" width=\"17\" height=\"17\" rx=\"4\" fill=\"none\" stroke=\"#F26B21\" stroke-width=\"3\"/></svg>"}, "cubby:avatar-claro": {"n": "cubby-avatar-claro.svg", "s": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1024 1024\" width=\"1024\" height=\"1024\"><rect width=\"1024\" height=\"1024\" fill=\"#F2F4F7\"/><g transform=\"translate(212 212) scale(9.375)\"><rect x=\"9\" y=\"9\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#16284A\"/><rect x=\"35\" y=\"9\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#16284A\"/><rect x=\"9\" y=\"35\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#16284A\"/><rect x=\"36.5\" y=\"36.5\" width=\"17\" height=\"17\" rx=\"4\" fill=\"none\" stroke=\"#F26B21\" stroke-width=\"3\"/></g></svg>"}, "cubby:logotipo": {"n": "cubby-logotipo.svg", "s": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 271 64\" width=\"271\" height=\"64\"><g><rect width=\"64\" height=\"64\" rx=\"14\" fill=\"#16284A\"/><rect x=\"9\" y=\"9\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#F2F4F7\"/><rect x=\"35\" y=\"9\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#F2F4F7\"/><rect x=\"9\" y=\"35\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#F2F4F7\"/><rect x=\"36.5\" y=\"36.5\" width=\"17\" height=\"17\" rx=\"4\" fill=\"none\" stroke=\"#F26B21\" stroke-width=\"3\"/></g><path transform=\"translate(82 49)\" d=\"M19.282 0.744Q13.888 0.744 10.106 -1.116Q6.324 -2.976 4.309 -6.789Q2.294 -10.602 2.294 -16.368Q2.294 -22.134 4.34 -25.947Q6.386 -29.759999999999998 10.168 -31.619999999999997Q13.95 -33.48 19.282 -33.48Q22.754 -33.48 25.698999999999998 -32.674Q28.644 -31.868 30.845 -30.194Q33.046 -28.52 34.224000000000004 -25.978Q35.402 -23.436 35.402 -19.902H25.419999999999998Q25.419999999999998 -22.01 24.707 -23.374000000000002Q23.994 -24.738 22.63 -25.42Q21.266 -26.102 19.22 -26.102Q16.864 -26.102 15.407 -25.11Q13.95 -24.118 13.268 -22.195999999999998Q12.586 -20.274 12.586 -17.422V-15.19Q12.586 -12.4 13.268 -10.478Q13.95 -8.556 15.5 -7.595Q17.05 -6.634 19.468 -6.634Q21.576 -6.634 22.971 -7.285Q24.366 -7.936 25.11 -9.331Q25.854 -10.725999999999999 25.854 -12.834H35.402Q35.402 -9.424 34.224000000000004 -6.850999999999999Q33.046 -4.278 30.875999999999998 -2.6039999999999996Q28.706 -0.9299999999999999 25.73 -0.09299999999999997Q22.754 0.744 19.282 0.744Z M52.018 0.744Q46.748000000000005 0.744 43.86500000000001 -2.17Q40.982000000000006 -5.084 40.982000000000006 -11.098V-32.674H51.150000000000006V-12.524Q51.150000000000006 -11.222 51.49100000000001 -10.23Q51.83200000000001 -9.238 52.452000000000005 -8.556Q53.072 -7.874 54.033 -7.564Q54.994 -7.254 56.11000000000001 -7.254Q57.908 -7.254 59.272000000000006 -8.091000000000001Q60.63600000000001 -8.928 61.44200000000001 -10.385000000000002Q62.248000000000005 -11.842 62.248000000000005 -13.578V-32.674H72.416V0.0H64.046L63.426 -4.65H62.992000000000004Q61.876000000000005 -3.038 60.17100000000001 -1.798Q58.46600000000001 -0.558 56.38900000000001 0.09299999999999997Q54.312000000000005 0.744 52.018 0.744Z M99.2 0.744Q96.038 0.744 93.372 -0.5579999999999999Q90.706 -1.8599999999999999 89.094 -4.526H88.66L87.916 0.0H79.608V-44.888H89.776V-29.326H90.148Q91.14 -30.628 92.535 -31.558Q93.93 -32.488 95.666 -32.953Q97.402 -33.418 99.386 -33.418Q103.416 -33.418 106.392 -31.558Q109.368 -29.698 110.97999999999999 -25.947000000000003Q112.592 -22.196 112.592 -16.43Q112.592 -10.54 110.97999999999999 -6.757999999999999Q109.368 -2.976 106.36099999999999 -1.116Q103.354 0.744 99.2 0.744ZM96.038 -7.192Q98.332 -7.192 99.727 -8.091000000000001Q101.122 -8.99 101.74199999999999 -10.788Q102.362 -12.586 102.362 -15.19V-17.36Q102.362 -20.026 101.74199999999999 -21.823999999999998Q101.122 -23.622 99.727 -24.552Q98.332 -25.482 96.038 -25.482Q94.364 -25.482 93.155 -24.862000000000002Q91.946 -24.242 91.17099999999999 -23.126Q90.396 -22.01 90.055 -20.46Q89.714 -18.91 89.714 -17.05V-15.562Q89.714 -13.02 90.365 -11.129Q91.01599999999999 -9.238 92.411 -8.215Q93.806 -7.192 96.038 -7.192Z M137.826 0.744Q134.664 0.744 131.998 -0.5579999999999999Q129.332 -1.8599999999999999 127.72 -4.526H127.286L126.542 0.0H118.23400000000001V-44.888H128.40200000000002V-29.326H128.774Q129.766 -30.628 131.161 -31.558Q132.556 -32.488 134.292 -32.953Q136.028 -33.418 138.012 -33.418Q142.042 -33.418 145.018 -31.558Q147.994 -29.698 149.606 -25.947000000000003Q151.21800000000002 -22.196 151.21800000000002 -16.43Q151.21800000000002 -10.54 149.606 -6.757999999999999Q147.994 -2.976 144.98700000000002 -1.116Q141.98000000000002 0.744 137.826 0.744ZM134.664 -7.192Q136.958 -7.192 138.353 -8.091000000000001Q139.748 -8.99 140.368 -10.788Q140.988 -12.586 140.988 -15.19V-17.36Q140.988 -20.026 140.368 -21.823999999999998Q139.748 -23.622 138.353 -24.552Q136.958 -25.482 134.664 -25.482Q132.99 -25.482 131.781 -24.862000000000002Q130.572 -24.242 129.797 -23.126Q129.022 -22.01 128.68099999999998 -20.46Q128.34 -18.91 128.34 -17.05V-15.562Q128.34 -13.02 128.99099999999999 -11.129Q129.642 -9.238 131.037 -8.215Q132.43200000000002 -7.192 134.664 -7.192Z M162.006 12.214Q159.774 12.214 158.10000000000002 11.873000000000001Q156.42600000000002 11.532 155.744 11.284V4.836H160.02200000000002Q161.758 4.836 162.998 4.061Q164.238 3.286 164.95100000000002 2.201Q165.66400000000002 1.116 165.97400000000002 0.0L153.078 -32.674H163.928L168.764 -18.352Q169.136 -17.36 169.601 -15.779Q170.066 -14.198 170.531 -12.555Q170.996 -10.911999999999999 171.306 -9.61H171.678Q171.92600000000002 -10.478 172.236 -11.625Q172.546 -12.772 172.856 -13.981Q173.166 -15.19 173.507 -16.306Q173.848 -17.422 174.096 -18.29L178.25 -32.674H188.356L177.072 -1.302Q176.018 1.55 174.747 4.03Q173.476 6.51 171.74 8.338999999999999Q170.00400000000002 10.168 167.61700000000002 11.190999999999999Q165.23000000000002 12.214 162.006 12.214Z\" fill=\"#16284A\"/></svg>"}, "cubby:reverso": {"n": "cubby-logotipo-reverso.svg", "s": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 271 64\" width=\"271\" height=\"64\"><g><rect width=\"64\" height=\"64\" rx=\"14\" fill=\"#F2F4F7\"/><rect x=\"9\" y=\"9\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#16284A\"/><rect x=\"35\" y=\"9\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#16284A\"/><rect x=\"9\" y=\"35\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#16284A\"/><rect x=\"36.5\" y=\"36.5\" width=\"17\" height=\"17\" rx=\"4\" fill=\"none\" stroke=\"#F26B21\" stroke-width=\"3\"/></g><path transform=\"translate(82 49)\" d=\"M19.282 0.744Q13.888 0.744 10.106 -1.116Q6.324 -2.976 4.309 -6.789Q2.294 -10.602 2.294 -16.368Q2.294 -22.134 4.34 -25.947Q6.386 -29.759999999999998 10.168 -31.619999999999997Q13.95 -33.48 19.282 -33.48Q22.754 -33.48 25.698999999999998 -32.674Q28.644 -31.868 30.845 -30.194Q33.046 -28.52 34.224000000000004 -25.978Q35.402 -23.436 35.402 -19.902H25.419999999999998Q25.419999999999998 -22.01 24.707 -23.374000000000002Q23.994 -24.738 22.63 -25.42Q21.266 -26.102 19.22 -26.102Q16.864 -26.102 15.407 -25.11Q13.95 -24.118 13.268 -22.195999999999998Q12.586 -20.274 12.586 -17.422V-15.19Q12.586 -12.4 13.268 -10.478Q13.95 -8.556 15.5 -7.595Q17.05 -6.634 19.468 -6.634Q21.576 -6.634 22.971 -7.285Q24.366 -7.936 25.11 -9.331Q25.854 -10.725999999999999 25.854 -12.834H35.402Q35.402 -9.424 34.224000000000004 -6.850999999999999Q33.046 -4.278 30.875999999999998 -2.6039999999999996Q28.706 -0.9299999999999999 25.73 -0.09299999999999997Q22.754 0.744 19.282 0.744Z M52.018 0.744Q46.748000000000005 0.744 43.86500000000001 -2.17Q40.982000000000006 -5.084 40.982000000000006 -11.098V-32.674H51.150000000000006V-12.524Q51.150000000000006 -11.222 51.49100000000001 -10.23Q51.83200000000001 -9.238 52.452000000000005 -8.556Q53.072 -7.874 54.033 -7.564Q54.994 -7.254 56.11000000000001 -7.254Q57.908 -7.254 59.272000000000006 -8.091000000000001Q60.63600000000001 -8.928 61.44200000000001 -10.385000000000002Q62.248000000000005 -11.842 62.248000000000005 -13.578V-32.674H72.416V0.0H64.046L63.426 -4.65H62.992000000000004Q61.876000000000005 -3.038 60.17100000000001 -1.798Q58.46600000000001 -0.558 56.38900000000001 0.09299999999999997Q54.312000000000005 0.744 52.018 0.744Z M99.2 0.744Q96.038 0.744 93.372 -0.5579999999999999Q90.706 -1.8599999999999999 89.094 -4.526H88.66L87.916 0.0H79.608V-44.888H89.776V-29.326H90.148Q91.14 -30.628 92.535 -31.558Q93.93 -32.488 95.666 -32.953Q97.402 -33.418 99.386 -33.418Q103.416 -33.418 106.392 -31.558Q109.368 -29.698 110.97999999999999 -25.947000000000003Q112.592 -22.196 112.592 -16.43Q112.592 -10.54 110.97999999999999 -6.757999999999999Q109.368 -2.976 106.36099999999999 -1.116Q103.354 0.744 99.2 0.744ZM96.038 -7.192Q98.332 -7.192 99.727 -8.091000000000001Q101.122 -8.99 101.74199999999999 -10.788Q102.362 -12.586 102.362 -15.19V-17.36Q102.362 -20.026 101.74199999999999 -21.823999999999998Q101.122 -23.622 99.727 -24.552Q98.332 -25.482 96.038 -25.482Q94.364 -25.482 93.155 -24.862000000000002Q91.946 -24.242 91.17099999999999 -23.126Q90.396 -22.01 90.055 -20.46Q89.714 -18.91 89.714 -17.05V-15.562Q89.714 -13.02 90.365 -11.129Q91.01599999999999 -9.238 92.411 -8.215Q93.806 -7.192 96.038 -7.192Z M137.826 0.744Q134.664 0.744 131.998 -0.5579999999999999Q129.332 -1.8599999999999999 127.72 -4.526H127.286L126.542 0.0H118.23400000000001V-44.888H128.40200000000002V-29.326H128.774Q129.766 -30.628 131.161 -31.558Q132.556 -32.488 134.292 -32.953Q136.028 -33.418 138.012 -33.418Q142.042 -33.418 145.018 -31.558Q147.994 -29.698 149.606 -25.947000000000003Q151.21800000000002 -22.196 151.21800000000002 -16.43Q151.21800000000002 -10.54 149.606 -6.757999999999999Q147.994 -2.976 144.98700000000002 -1.116Q141.98000000000002 0.744 137.826 0.744ZM134.664 -7.192Q136.958 -7.192 138.353 -8.091000000000001Q139.748 -8.99 140.368 -10.788Q140.988 -12.586 140.988 -15.19V-17.36Q140.988 -20.026 140.368 -21.823999999999998Q139.748 -23.622 138.353 -24.552Q136.958 -25.482 134.664 -25.482Q132.99 -25.482 131.781 -24.862000000000002Q130.572 -24.242 129.797 -23.126Q129.022 -22.01 128.68099999999998 -20.46Q128.34 -18.91 128.34 -17.05V-15.562Q128.34 -13.02 128.99099999999999 -11.129Q129.642 -9.238 131.037 -8.215Q132.43200000000002 -7.192 134.664 -7.192Z M162.006 12.214Q159.774 12.214 158.10000000000002 11.873000000000001Q156.42600000000002 11.532 155.744 11.284V4.836H160.02200000000002Q161.758 4.836 162.998 4.061Q164.238 3.286 164.95100000000002 2.201Q165.66400000000002 1.116 165.97400000000002 0.0L153.078 -32.674H163.928L168.764 -18.352Q169.136 -17.36 169.601 -15.779Q170.066 -14.198 170.531 -12.555Q170.996 -10.911999999999999 171.306 -9.61H171.678Q171.92600000000002 -10.478 172.236 -11.625Q172.546 -12.772 172.856 -13.981Q173.166 -15.19 173.507 -16.306Q173.848 -17.422 174.096 -18.29L178.25 -32.674H188.356L177.072 -1.302Q176.018 1.55 174.747 4.03Q173.476 6.51 171.74 8.338999999999999Q170.00400000000002 10.168 167.61700000000002 11.190999999999999Q165.23000000000002 12.214 162.006 12.214Z\" fill=\"#F2F4F7\"/></svg>"}, "cubby:simbolo": {"n": "cubby-simbolo-quadrado.svg", "s": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><rect width=\"64\" height=\"64\" rx=\"14\" fill=\"#16284A\"/><rect x=\"9\" y=\"9\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#F2F4F7\"/><rect x=\"35\" y=\"9\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#F2F4F7\"/><rect x=\"9\" y=\"35\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#F2F4F7\"/><rect x=\"36.5\" y=\"36.5\" width=\"17\" height=\"17\" rx=\"4\" fill=\"none\" stroke=\"#F26B21\" stroke-width=\"3\"/></svg>"}, "cubby:simbolo-c": {"n": "cubby-simbolo-c.svg", "s": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\" width=\"64\" height=\"64\"><rect x=\"9\" y=\"9\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#16284A\"/><rect x=\"35\" y=\"9\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#16284A\"/><rect x=\"9\" y=\"35\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#16284A\"/><rect x=\"36.5\" y=\"36.5\" width=\"17\" height=\"17\" rx=\"4\" fill=\"none\" stroke=\"#F26B21\" stroke-width=\"3\"/></svg>"}, "cubby:avatar": {"n": "cubby-avatar.svg", "s": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1024 1024\" width=\"1024\" height=\"1024\"><rect width=\"1024\" height=\"1024\" fill=\"#16284A\"/><g transform=\"translate(212 212) scale(9.375)\"><rect x=\"9\" y=\"9\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#F2F4F7\"/><rect x=\"35\" y=\"9\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#F2F4F7\"/><rect x=\"9\" y=\"35\" width=\"20\" height=\"20\" rx=\"5\" fill=\"#F2F4F7\"/><rect x=\"36.5\" y=\"36.5\" width=\"17\" height=\"17\" rx=\"4\" fill=\"none\" stroke=\"#F26B21\" stroke-width=\"3\"/></g></svg>"}}</script>
+<script>window.LOGIN_BLOB={"iter": 310000, "salt": "LUT41twJlfpEEtswcw3zMA==", "iv": "GxYLswkTWD0Idqx1", "ct": "p7lEt/mtbhKkynYKlKIsz4/JDKNGlRmycuYcGnhTyNg="}</script>
+<script>
+'use strict';
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let PERSIST=true;try{localStorage.setItem('__t','1');localStorage.removeItem('__t')}catch(e){PERSIST=false}
+const mem={};
+const LS={get(k,d){try{const v=localStorage.getItem(k);if(v!=null)return JSON.parse(v)}catch(e){}return k in mem?mem[k]:d},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));delete mem[k]}catch(e){mem[k]=v}},del(k){try{localStorage.removeItem(k)}catch(e){}delete mem[k]}};
+const today=()=>new Date().toISOString().slice(0,10);
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2800)}
+function ask(msg,ok='Confirmar',danger=false){return new Promise(res=>{const d=$('#dlgAsk');$('#askMsg').textContent=msg;const b=$('#askOk');b.textContent=ok;b.className='btn pri'+(danger?' danger':'');let done=false;const fin=v=>{if(done)return;done=true;if(d.open)d.close();res(v)};b.onclick=()=>fin(true);$('#askNo').onclick=()=>fin(false);d.oncancel=()=>fin(false);d.showModal()})}
+function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000)}
+async function copy(txt,label,clearMs){try{await navigator.clipboard.writeText(txt)}catch(e){const t=document.createElement('textarea');t.value=txt;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}toast(label+' copiado'+(clearMs?' · a área de transferência limpa em '+clearMs/1000+'s':''));if(clearMs)setTimeout(()=>{try{navigator.clipboard.writeText(' ').catch(()=>{})}catch(e){}},clearMs)}
+
+/* ---------- arquivos (IndexedDB, com plano B em memória) ---------- */
+const DB={_db:undefined,mem:new Map(),
+ async open(){if(this._db!==undefined)return this._db;try{this._db=await new Promise((res,rej)=>{const r=indexedDB.open('cubehub',1);r.onupgradeneeded=()=>r.result.createObjectStore('files');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);r.onblocked=()=>rej(new Error('blocked'))})}catch(e){this._db=false}return this._db},
+ async get(k){const d=await this.open();let v;if(d){v=await new Promise(r=>{try{const q=d.transaction('files').objectStore('files').get(k);q.onsuccess=()=>r(q.result);q.onerror=()=>r(undefined)}catch(e){r(undefined)}})}return v!==undefined?v:this.mem.get(k)},
+ async put(k,v){const d=await this.open();if(!d){this.mem.set(k,v);return false}return new Promise(r=>{try{const t=d.transaction('files','readwrite');t.objectStore('files').put(v,k);t.oncomplete=()=>r(true);t.onerror=()=>{this.mem.set(k,v);r(false)}}catch(e){this.mem.set(k,v);r(false)}})},
+ async del(k){this.mem.delete(k);const d=await this.open();if(!d)return;return new Promise(r=>{try{const t=d.transaction('files','readwrite');t.objectStore('files').delete(k);t.oncomplete=()=>r();t.onerror=()=>r()}catch(e){r()}})},
+ async keys(p){const d=await this.open();const m=[...this.mem.keys()].filter(x=>x.startsWith(p));if(!d)return m;const ks=await new Promise(r=>{try{const q=d.transaction('files').objectStore('files').getAllKeys(IDBKeyRange.bound(p,p+'￿'));q.onsuccess=()=>r(q.result);q.onerror=()=>r([])}catch(e){r([])}});return [...new Set([...ks,...m])]}
+};
+
+/* ---------- zip simples (sem compressão) ---------- */
+function crc32(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++){c^=b[i];for(let k=0;k<8;k++)c=(c>>>1)^(0xEDB88320&-(c&1))}return(c^0xFFFFFFFF)>>>0}
+function zip(files){const enc=new TextEncoder();let off=0;const parts=[],cd=[];
+ for(const f of files){const n=enc.encode(f.name),crc=crc32(f.data),sz=f.data.length;
+  const lh=new DataView(new ArrayBuffer(30));lh.setUint32(0,0x04034b50,true);lh.setUint16(4,20,true);lh.setUint16(6,0x0800,true);lh.setUint16(12,0x21,true);lh.setUint32(14,crc,true);lh.setUint32(18,sz,true);lh.setUint32(22,sz,true);lh.setUint16(26,n.length,true);
+  parts.push(new Uint8Array(lh.buffer),n,f.data);
+  const ch=new DataView(new ArrayBuffer(46));ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);ch.setUint16(8,0x0800,true);ch.setUint16(14,0x21,true);ch.setUint32(16,crc,true);ch.setUint32(20,sz,true);ch.setUint32(24,sz,true);ch.setUint16(28,n.length,true);ch.setUint32(42,off,true);
+  cd.push(new Uint8Array(ch.buffer),n);off+=30+n.length+sz}
+ const cds=cd.reduce((a,b)=>a+b.length,0);const e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cds,true);e.setUint32(16,off,true);
+ return new Blob([...parts,...cd,new Uint8Array(e.buffer)],{type:'application/zip'})}
+
+/* ---------- paletas ---------- */
+const DEF={
+ cubby:[{n:'Azul-marinho Cubby',h:'#16284A'},{n:'Laranja do slot',h:'#F26B21'},{n:'Laranja para texto',h:'#B8420A'},{n:'Amarelo etiqueta',h:'#FFC83D'},{n:'Papel',h:'#F2F4F7'},{n:'Tinta',h:'#0E1726'},{n:'Tinta suave',h:'#586477'}]};
+const pal=b=>{const v=LS.get('cubehub.pal.'+b,null);return Array.isArray(v)&&v.length?v:DEF[b]};
+const readable=h=>{const n=parseInt(h.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;return(0.299*r+0.587*g+0.114*b)>150?'#0E1726':'#FFFFFF'};
+
+const svgDataUrl=s=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s);
+function svgToPng(svg,w,h){return new Promise((res,rej)=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);c.toBlob(b=>b?res(b):rej(new Error('Falha ao gerar PNG')),'image/png')};img.onerror=()=>rej(new Error('Falha ao ler o SVG'));img.src=svgDataUrl(svg)})}
+function aspectOf(t){let m=t.match(/viewBox\s*=\s*["']\s*[-\d.eE]+[\s,]+[-\d.eE]+[\s,]+([\d.eE]+)[\s,]+([\d.eE]+)/);if(m)return m[2]/m[1];const w=t.match(/<svg[^>]*\swidth\s*=\s*["']([\d.]+)/),h=t.match(/<svg[^>]*\sheight\s*=\s*["']([\d.]+)/);return w&&h?h[1]/w[1]:1}
+
+/* ---------- slots de arquivo ---------- */
+const VCUBBY=[
+['logotipo','Logotipo','Uso principal, para fundo claro. Fundo transparente.',0,1],
+['reverso','Logotipo reverso','Para fundo escuro ou azul-marinho. Fundo transparente.',1,1],
+['reverso-fundo','Logotipo reverso com fundo','Já com o azul-marinho atrás. Pronto para colar.',0,0],
+['simbolo','Símbolo quadrado','C-compartimento no quadrado azul. Ícone de app e favicon.',0,1],
+['simbolo-c','Símbolo C','Sem o quadrado, para fundo claro. Fundo transparente.',0,1],
+['simbolo-c-claro','Símbolo C claro','Sem o quadrado, para fundo azul ou escuro. Fundo transparente.',1,1],
+['avatar','Avatar azul','1024 × 1024 px. Perfil de Instagram, Shopee, TikTok.',0,0],
+['avatar-claro','Avatar papel','1024 × 1024 px. Versão clara para perfil.',2,0]];
+const SIZES=[512,1024,2048,4096];
+const UI={};
+async function getLogo(key){const o=await DB.get('logo:'+key);if(o)return o;const vs=window.SVGSEEDS&&window.SVGSEEDS[key];if(vs)return{kind:'svg',name:vs.n,type:'image/svg+xml',blob:new Blob([vs.s],{type:'image/svg+xml'}),seed:true};}
+
+const slotsHTML=b=>`<div class="grid2">${VCUBBY.map(([id,t,d,sb,tr])=>`<div class="card slot" data-brand="${b}" data-sb="${sb}" data-tr="${tr}" data-variant="${id}" data-title="${esc(t)}" data-desc="${esc(d)}"></div>`).join('')}</div>`;
+async function mountSlot(el){
+ const brand=el.dataset.brand,variant=el.dataset.variant,key=brand+':'+variant,title=el.dataset.title,desc=el.dataset.desc;
+ const st=UI[key]||(UI[key]={tone:'pos',bg:'transp'});
+ const ov=await getLogo(key);
+ const gen=false,SB=['#F2F4F7','#16284A','#DEE3EB'][+el.dataset.sb||0],trc=el.dataset.tr==='1'?' checker':'';
+ let body;
+ if(ov){
+  const url=URL.createObjectURL(ov.blob),isSvg=ov.kind==='svg';
+  let dim=null;if(!isSvg)dim=await new Promise(r=>{const i=new Image();i.onload=()=>r([i.naturalWidth,i.naturalHeight]);i.onerror=()=>r(null);i.src=url});
+  const btns=`<button class="btn m" data-a="orig">Original · ${esc(ov.name)}${dim?` · ${dim[0]}×${dim[1]}px`:''}</button>`+(isSvg?SIZES.map(s=>`<button class="btn m" data-a="png" data-s="${s}">PNG ${s}</button>`).join(''):'');
+  const warn=(dim&&dim[0]<2000&&!ov.seed)?`<p class="warn">${dim[0]} px de largura: serve para web, mas pode ficar mole em impressão grande. PNG não ganha resolução depois, então guarde também o vetor (SVG).</p>`:'';
+  body=`<div class="stage${trc}" style="background-color:${SB}"><img src="${url}" alt="${esc(title)}"></div><div class="row">${btns}</div>${warn}`;
+ }else{
+  body=`<div class="stage" style="border-style:dashed;background:var(--bg)"><div style="text-align:center;color:var(--mut);display:grid;gap:10px;justify-items:center;font-size:14px;line-height:20px"><i style="display:block;width:34px;height:34px;background:var(--acc);border-radius:4px"></i><span>Espaço vazio.<br>Solte aqui o arquivo oficial.</span></div></div>`;
+ }
+ const pick=`<div class="row"><label class="btn sm">${ov?'Substituir arquivo':'Enviar arquivo'}<input type="file" accept=".svg,.png,.jpg,.jpeg,.webp,image/*"></label>${ov&&!ov.seed?'<button class="btn sm danger" data-a="rm">Remover</button>':''}</div>`;
+ el.innerHTML=`<div><h3>${esc(title)} ${gen?'<span class="selo" style="vertical-align:middle">placeholder</span>':''}</h3><p>${esc(desc)}</p></div>${body}${pick}`;
+ const setFile=async f=>{if(!f)return;if(f.size>30e6){toast('Arquivo grande demais (máx. 30 MB)');return}const kind=(f.type==='image/svg+xml'||/\.svg$/i.test(f.name))?'svg':'raster';await DB.put('logo:'+key,{kind,name:f.name,type:f.type,blob:kind==='svg'?new Blob([f],{type:'image/svg+xml'}):f});toast('Arquivo guardado neste navegador');mountSlot(el)};
+ el.onchange=e=>{if(e.target.type==='file'){setFile(e.target.files[0]);e.target.value=''}};
+ const stage=$('.stage',el);stage.ondragover=e=>{e.preventDefault();stage.style.outline='2px dashed var(--brand)'};stage.ondragleave=()=>{stage.style.outline=''};stage.ondrop=e=>{e.preventDefault();stage.style.outline='';setFile(e.dataTransfer.files[0])};
+ el.onclick=async e=>{
+  const sb=e.target.closest('[data-g] button');if(sb){st[sb.parentElement.dataset.g]=sb.dataset.v;mountSlot(el);return}
+  const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,s=+b.dataset.s;
+  try{
+   if(a==='rm'){if(await ask('Remover este arquivo do hub? Ele só existe neste navegador.','Remover',true)){await DB.del('logo:'+key);mountSlot(el)}return}
+   const base=`cubby-${variant}`;
+   if(ov){if(a==='orig')return dl(ov.blob,ov.name);const t=await ov.blob.text();toast(`Gerando PNG ${s}px…`);return dl(await svgToPng(t,s,Math.round(s*aspectOf(t))),`${base}-${s}px.png`)}
+  }catch(err){toast('Erro: '+err.message)}
+ };
+}
+async function packBrand(){
+ toast('Montando o pacote .zip…');const files=[],enc=new TextEncoder();
+ for(const[v]of VCUBBY){const ov=await getLogo('cubby:'+v);if(!ov)continue;
+  files.push({name:`cubby/${v}/${ov.name}`,data:new Uint8Array(await ov.blob.arrayBuffer())});
+  if(ov.kind==='svg'){const t=await ov.blob.text();for(const s of[1024,4096])files.push({name:`cubby/${v}/cubby-${v}-${s}px.png`,data:new Uint8Array(await(await svgToPng(t,s,Math.round(s*aspectOf(t)))).arrayBuffer())})}}
+ files.push({name:'cubby/paleta.txt',data:enc.encode(pal('cubby').map(c=>`${c.n}\t${c.h.toUpperCase()}`).join('\n'))});
+ dl(zip(files),`cubby-marca-${today()}.zip`);toast('Pacote pronto')}
+function palPng(brand){const p=pal(brand),W=2000,H=700,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,H);const w=W/p.length;p.forEach((s,i)=>{x.fillStyle=s.h;x.fillRect(i*w,0,w,540);x.fillStyle='#0E1726';x.font='700 '+Math.min(40,w/9)+'px sans-serif';x.fillText(s.n,i*w+24,600);x.font='500 '+Math.min(34,w/10)+'px monospace';x.fillText(s.h.toUpperCase(),i*w+24,650)});return new Promise(r=>c.toBlob(r,'image/png'))}
+
+/* ---------- prateleira de arquivos (fontes, manuais) ---------- */
+const shelfHTML=(id,title,desc)=>`<div class="card shelf" data-shelf="${id}"><h3 style="margin:0;font:700 18px/24px var(--display)">${esc(title)}</h3><p style="margin:2px 0 10px;color:var(--mut);font-size:14px;line-height:20px">${esc(desc)}</p><div class="items"></div><label class="btn sm" style="margin-top:12px">Adicionar arquivos<input type="file" multiple></label></div>`;
+const fmtSize=n=>n>1e6?(n/1e6).toFixed(1)+' MB':Math.max(1,Math.round(n/1e3))+' KB';
+async function mountShelf(el){
+ const id=el.dataset.shelf,ks=await DB.keys('shelf:'+id+':');const items=[];for(const k of ks){const f=await DB.get(k);if(f)items.push({k,...f})}
+ items.sort((a,b)=>b.added-a.added);
+ $('.items',el).innerHTML=items.length?items.map(f=>`<div class="it"><div><b style="font-weight:600">${esc(f.name)}</b><br><small class="spec">${fmtSize(f.size)}</small></div><div class="row"><button class="btn sm" data-d="${esc(f.k)}">Baixar</button><button class="btn sm danger" data-x="${esc(f.k)}">Apagar</button></div></div>`).join(''):'<p style="margin:0;color:var(--mut);font-size:14px">Nada por aqui ainda.</p>';
+ el.onclick=async e=>{const d=e.target.closest('[data-d]'),x=e.target.closest('[data-x]');
+  if(d){const f=await DB.get(d.dataset.d);if(f)dl(f.blob,f.name)}
+  if(x&&await ask('Apagar este arquivo do hub?','Apagar',true)){await DB.del(x.dataset.x);mountShelf(el)}};
+ el.onchange=async e=>{if(e.target.type!=='file')return;for(const f of e.target.files){if(f.size>50e6){toast(f.name+' passa de 50 MB');continue}await DB.put('shelf:'+id+':'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),{name:f.name,size:f.size,type:f.type,added:Date.now(),blob:f})}e.target.value='';toast('Arquivos guardados neste navegador');mountShelf(el)};
+}
+</script>
+<script>
+'use strict';
+/* ---------- navegação ---------- */
+const NAV=[
+ {cat:'ident',items:[['logos','Logos'],['paleta','Paleta'],['tipografia','Tipografia'],['regras','Regras de uso']]},
+ {cat:'empresa',items:[['dados','Dados cadastrais']]},
+ {cat:'senhas',items:[['cofre','Cofre']]}];
+const CATC={ident:'--brand',empresa:'--pos',senhas:'--caut'};
+const CATL={ident:'Identidade',empresa:'Empresa',senhas:'Senhas'};
+const PAGEINFO={};NAV.forEach(c=>c.items.forEach(([id,l])=>PAGEINFO[id]={cat:c.cat,label:l}));
+const head=(eb,t,d,cls='')=>`<div class="ph ${cls}"><span class="eyebrow">${eb}</span><h1>${t}</h1><p>${d}</p></div>`;
+function renderNav(active){
+ const st=LS.get('cubehub.nav',{});
+ let h=`<a class="item home ${active==='home'?'on':''}" href="#/">Início</a>`;
+ NAV.forEach(c=>{const closed=!!st[c.cat];
+  h+=`<div style="--cc:var(${CATC[c.cat]})"><div class="cat ${closed?'closed':''}" data-cat="${c.cat}"><button class="chev" aria-label="Abrir ou fechar ${CATL[c.cat]}" aria-expanded="${!closed}"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span class="pill">${CATL[c.cat]}</span></div>`;
+  if(!closed)c.items.forEach(([id,l])=>h+=`<a class="item ${id===active?'on':''}" href="#/${id}">${l}</a>`);
+  h+='</div>'});
+ const n=$('#nav');n.innerHTML=h;
+ $$('.chev',n).forEach(b=>b.onclick=()=>{const k=b.closest('.cat').dataset.cat,s=LS.get('cubehub.nav',{});s[k]=!s[k];LS.set('cubehub.nav',s);renderNav(active)})}
+const SV=k=>{const s=window.SVGSEEDS&&window.SVGSEEDS[k];return s?s.s:''};
+function setBrand(t){const s=SV(t==='dark'?'cubby:reverso':'cubby:logotipo');if(s)$('#brandLogo').src=svgDataUrl(s);const ic=document.querySelector('link[rel=icon]')||document.head.appendChild(Object.assign(document.createElement('link'),{rel:'icon'}));const a=SV('cubby:avatar');if(a)ic.href=svgDataUrl(a)}
+function applyTheme(){const t=LS.get('cubehub.theme','light');document.documentElement.dataset.theme=t;setBrand(t);$$('#themeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.t===t))}
+function updateVaultState(){$('#vaultState').textContent=V.key?'cofre · aberto':(LS.get('cubehub.vault',null)?'cofre · bloqueado':'cofre · não criado');$('#btnLock').style.display=V.key?'':'none'}
+const bindZip=r=>$$('[data-zip]',r).forEach(b=>b.onclick=()=>packBrand(b.dataset.zip).catch(e=>toast('Erro: '+e.message)));
+
+/* ---------- páginas ---------- */
+const vaultMeta=()=>V.key?`${V.data.entries.length} senhas · aberto`:(LS.get('cubehub.vault',null)?'bloqueado':'ainda não criado');
+async function home(v){
+ const cp=pal('cubby');
+ const lock='<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><rect x="12" y="28" width="40" height="28" rx="6"/><path d="M22 28v-8a10 10 0 0 1 20 0v8"/><rect x="28" y="38" width="8" height="8" rx="2" fill="var(--acc)" stroke="none"/></svg>';
+ const slot='<svg viewBox="0 0 64 64"><rect x="4" y="4" width="56" height="56" rx="8" fill="none" stroke="var(--brand)" stroke-width="4"/><rect x="22" y="22" width="20" height="20" rx="4" fill="var(--acc)"/></svg>';
+ const T=[['logos','Logos','ident',SV('cubby:simbolo'),'8 arquivos · SVG e PNG'],
+  ['paleta','Paleta','ident',`<div class="sqs">${cp.slice(0,4).map(c=>`<i style="background:${c.h}"></i>`).join('')}</div>`,'7 cores do sistema'],
+  ['tipografia','Tipografia','ident','<span class="aa">Aa</span>','fontes e usos'],
+  ['regras','Regras de uso','ident','<span class="spec">mín. 80 px</span>','o que pode e o que não pode'],
+  ['dados','Dados cadastrais','empresa','<span class="spec">CNPJ · endereço</span>','copia com um clique'],
+  ['cofre','Cofre de senhas','senhas',lock,vaultMeta()]];
+ v.innerHTML=head('Cubby · central da marca','Tudo no seu lugar, com espaço de sobra.','Logos em alta resolução, paleta, regras de uso e as senhas da empresa. Escolha uma pasta.','hero')+
+ `<div class="wrap"><div class="tiles">${T.map(([id,t,c,deco,m])=>`<a class="tile" href="#/${id}" style="--cc:var(${CATC[c]})"><span class="pill" style="width:max-content">${CATL[c]}</span><div class="deco">${deco}</div><div><h3>${t}</h3><small>${m}</small></div></a>`).join('')}<div class="tile empty" aria-hidden="true"><i></i><small>espaço de sobra</small></div></div>
+ <h2>Onde ficam os arquivos e as senhas</h2><p>Leia uma vez, vale para tudo aqui.</p>
+ <div class="grid2"><div class="card"><b style="font-family:var(--display)">Neste navegador</b><p style="margin:6px 0 0;color:var(--mut);font-size:14px;line-height:20px">Arquivos e senhas ficam guardados no navegador onde você abriu este arquivo. Nada é enviado a servidor.</p></div>
+ <div class="card"><b style="font-family:var(--display)">Para outro computador ou para o sócio</b><p style="margin:6px 0 0;color:var(--mut);font-size:14px;line-height:20px">Logos: baixe o pacote .zip. Senhas: exporte o cofre (arquivo criptografado) e importe do outro lado.</p></div>
+ <div class="card"><b style="font-family:var(--display)">Faça backup de vez em quando</b><p style="margin:6px 0 0;color:var(--mut);font-size:14px;line-height:20px">Limpar os dados do navegador apaga tudo daqui. O pacote .zip e o cofre exportado são o seu backup.</p></div></div></div>`}
+async function logos(v){
+ v.innerHTML=head('Identidade','Logos da Cubby','Baixe em SVG (vetor) ou em PNG de 512 a 4096 px, com fundo transparente. Tem também os avatares prontos para perfil.')+
+ `<div class="wrap"><div class="grid2" style="margin-bottom:var(--space-6)"><div class="card"><span class="selo">Slogan</span><p style="margin:12px 0 0;font:800 28px/32px var(--display);letter-spacing:-.01em">Tudo no seu lugar, com espaço de sobra.</p></div>
+ <div class="card" style="border-left:4px solid var(--caut)"><b style="font-family:var(--display);color:var(--caut)">Antes de gastar com a marca</b><p style="margin:6px 0 0;color:var(--mut);font-size:14px;line-height:20px">O nome ainda não foi conferido no INPI (classes 20, 35 e 21). Não imprima etiqueta nem embalagem com o logo antes dessa busca.</p></div></div>
+ <div class="row" style="margin-bottom:var(--space-4)"><button class="btn pri" data-zip="cubby">Baixar pacote completo (.zip)</button><a class="btn" href="#/paleta">Ver paleta</a><a class="btn" href="#/regras">Regras de uso</a></div>${slotsHTML('cubby')}</div>`;
+ $$('.slot',v).forEach(mountSlot);bindZip(v)}
+function palSection(brand,title,desc){const p=pal(brand);
+ return `<h2>${title}</h2><p>${desc}</p><div class="tiles" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))" data-pal="${brand}">${p.map((c,i)=>`<div class="sw"><div class="c spec" data-copy="${c.h}" style="background:${c.h};color:${readable(c.h)}" title="Clique para copiar">${c.h.toUpperCase()}</div><div class="b"><input class="inp" data-i="${i}" data-f="n" value="${esc(c.n)}" aria-label="Nome da cor"><div class="hex"><input type="color" data-i="${i}" data-f="h" value="${c.h}" aria-label="Escolher cor"><input class="inp spec" data-i="${i}" data-f="t" value="${c.h.toUpperCase()}" maxlength="7" aria-label="Código hex"></div></div></div>`).join('')}</div>
+ <div class="row" style="margin-top:var(--space-3)"><button class="btn" data-a="css" data-b="${brand}">Copiar como CSS</button><button class="btn" data-a="png" data-b="${brand}">Baixar paleta (.png)</button>${brand==='cubby'?'<button class="btn" data-a="reset" data-b="cubby">Restaurar cores do sistema</button>':''}</div>`}
+async function paleta(v){
+ v.innerHTML=head('Identidade','Paleta','Clique na cor para copiar o código. Mude o nome ou a cor nos campos abaixo dela.')+`<div class="wrap">${palSection('cubby','Cubby','Cores do sistema de design da Cubby. Use sempre pelo nome do token, nunca o hex solto.')}</div>`;
+ v.onclick=async e=>{const c=e.target.closest('[data-copy]');if(c)return copy(c.dataset.copy.toUpperCase(),'Cor');
+  const b=e.target.closest('[data-a]');if(!b)return;const brand=b.dataset.b,p=pal(brand);
+  if(b.dataset.a==='css'){const css=':root{\n'+p.map(x=>`  --${brand}-${x.n.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}: ${x.h.toUpperCase()};`).join('\n')+'\n}';copy(css,'CSS')}
+  if(b.dataset.a==='png')dl(await palPng(brand),`${brand}-paleta.png`);
+  if(b.dataset.a==='reset'){LS.del('cubehub.pal.'+brand);route()}};
+ v.onchange=e=>{const t=e.target,i=t.dataset.i;if(i==null)return;const brand=t.closest('[data-pal]').dataset.pal,p=pal(brand).map(x=>({...x})),f=t.dataset.f;
+  if(f==='n')p[i].n=t.value.trim()||p[i].n;
+  else{let h=t.value.trim();if(f==='t'){if(h[0]!=='#')h='#'+h;if(!/^#[0-9a-f]{6}$/i.test(h)){toast('Use 6 dígitos, ex.: #F26B21');route();return}}p[i].h=h.toUpperCase()}
+  LS.set('cubehub.pal.'+brand,p);route()}}
+const FDEF={cubby:{t:'Archivo (700, 800)',x:'IBM Plex Sans (400, 600)',m:'IBM Plex Mono (500)'}};
+const fam=n=>{const f=(n||'').split('(')[0].trim().replace(/["'\\]/g,'');return f?`'${f}',system-ui,sans-serif`:'inherit'};
+async function tipografia(v){
+ const sec=(brand,title,desc,roles)=>{const f=Object.assign({},FDEF[brand],LS.get('cubehub.fonts.'+brand,{}));
+  return `<h2>${title}</h2><p>${desc}</p><div class="grid2">${roles.map(([k,l,sample,sty])=>`<div class="card fontcard"><label class="f">${l}<input class="inp" data-b="${brand}" data-k="${k}" value="${esc(f[k])}" placeholder="nome da fonte"></label><div class="big" style="font-family:${k==='m'?"'IBM Plex Mono',ui-monospace,monospace":fam(f[k])};${sty}">${sample}</div></div>`).join('')}</div><div style="margin-top:var(--space-4)">${shelfHTML('fonts-'+brand,'Arquivos de fonte da Cubby','.ttf, .otf ou .woff2 para baixar e instalar.')}</div>`};
+ v.innerHTML=head('Identidade','Tipografia','Qual fonte usar em cada papel, com amostra e os arquivos para baixar. A amostra só aparece na fonte certa se ela estiver instalada neste computador.')+`<div class="wrap">${sec('cubby','Cubby','Do sistema de design: títulos em Archivo, texto em IBM Plex Sans, medidas em IBM Plex Mono.',[['t','Títulos e nome','Tudo no seu lugar','font-weight:800'],['x','Texto corrido','Cabe em gaveta de 40 cm. Mede antes de comprar.','font-size:20px;line-height:28px;letter-spacing:0'],['m','Medidas e códigos','32 x 22 x 7 cm','font-size:30px;font-weight:500;letter-spacing:0']])}</div>`;
+ $$('.shelf',v).forEach(mountShelf);
+ v.onchange=e=>{const t=e.target;if(!t.dataset.k||!t.dataset.b)return;const k='cubehub.fonts.'+t.dataset.b,o=LS.get(k,{});o[t.dataset.k]=t.value.trim();LS.set(k,o);route()}}
+async function regras(v){
+ const sty=(s,x)=>s.replace('<svg ',`<svg style="${x}" `);
+ const L=SV('cubby:logotipo'),R=SV('cubby:reverso'),C=SV('cubby:simbolo-c');
+ const lg=(w,x='')=>sty(L,`width:${w};max-width:none;max-height:none;height:auto;${x}`);
+ const NV='#16284A',PP='#F2F4F7';
+ const cards=[
+  ['ok','Espaço livre','Ao redor do logotipo, a largura do bloco do U.',`<div style="border:1.5px dashed #586477;padding:16px;width:78%">${lg('100%')}</div>`,PP],
+  ['ok','Tamanho mínimo','80 px de largura. Abaixo disso, use o símbolo C.',`<div style="display:flex;align-items:center;gap:18px"><div style="width:120px">${lg('100%')}</div><div style="width:80px">${lg('100%')}</div></div>`,PP],
+  ['ok','Fundo escuro','Sobre azul-marinho ou fundo escuro, use o logotipo reverso.',`<div style="width:70%">${sty(R,'width:100%;max-width:none;max-height:none;height:auto')}</div>`,NV],
+  ['no','Distorcer','Nunca estique nem achate o logotipo.',`<div style="width:62%;transform:scaleX(1.45) scaleY(.75)">${lg('100%')}</div>`,PP],
+  ['no','Girar','Nunca incline o logotipo.',`<div style="width:62%;transform:rotate(-12deg)">${lg('100%')}</div>`,PP],
+  ['no','Trocar a cor do quadrado','O quadrado dentro do compartimento é sempre laranja (accent).',`<div style="width:62%">${lg('100%').replace(/#F26B21/g,'#8B5CF6')}</div>`,PP],
+  ['no','Redigitar o nome','O nome foi desenhado a partir do Archivo ExtraBold e convertido em formas. Não digite em outra fonte.',`<div style="display:flex;align-items:center;gap:10px"><div style="width:44px">${sty(SV('cubby:simbolo'),'width:100%;max-width:none;height:auto')}</div><span style="font:italic 700 40px Georgia,serif;color:${NV}">cubby</span></div>`,PP],
+  ['no','Logotipo e símbolo C lado a lado','O compartimento apareceria duas vezes.',`<div style="display:flex;align-items:center;gap:16px"><div style="width:130px">${lg('100%')}</div><div style="width:40px">${sty(C,'width:100%;max-width:none;height:auto')}</div></div>`,PP]];
+ const tag=t=>t==='ok'?'<span class="ok">Pode</span>':'<span class="no">Não pode</span>';
+ v.innerHTML=head('Identidade','Regras de uso','O que pode e o que não pode fazer com o logo da Cubby.')+`<div class="wrap"><div class="rules">${cards.map(([t,h,d,demo,bg])=>`<div class="card rule"><div class="demo" style="background:${bg}">${demo}</div>${tag(t)}<b>${h}</b><span class="d">${d}</span></div>`).join('')}</div>
+ <div style="margin-top:var(--space-6)">${shelfHTML('manuais','Manuais e outros arquivos','PDF de manual de marca, apresentações, modelos. Qualquer arquivo até 50 MB.')}</div></div>`;
+ $$('.shelf',v).forEach(mountShelf)}
+const DADOS=[['Razão social','razao'],['Nome fantasia','fantasia'],['CNPJ','cnpj'],['Data de abertura','abertura'],['Endereço','endereco'],['E-mail da empresa','email'],['Telefone / WhatsApp','tel'],['Site','site'],['Instagram','insta'],['Sócios','socios']];
+async function dados(v){
+ const d=LS.get('cubehub.dados',{});
+ v.innerHTML=head('Empresa','Dados cadastrais','Os dados que você sempre precisa colar em algum cadastro. Um clique copia.')+`<div class="wrap"><div class="fields">${DADOS.map(([l,k])=>`<div class="fld"><label class="f">${l}${k==='socios'||k==='endereco'?`<textarea class="inp" rows="2" data-k="${k}">${esc(d[k]||'')}</textarea>`:`<input class="inp" data-k="${k}" value="${esc(d[k]||'')}">`}</label><button class="btn" data-c="${k}">Copiar</button></div>`).join('')}</div><p style="color:var(--mut);font-size:14px;line-height:20px;margin-top:var(--space-4)">Senhas não entram aqui. Use o <a href="#/cofre">Cofre</a>.</p></div>`;
+ let t;v.oninput=e=>{const k=e.target.dataset.k;if(!k)return;const o=LS.get('cubehub.dados',{});o[k]=e.target.value;clearTimeout(t);t=setTimeout(()=>LS.set('cubehub.dados',o),300)};
+ v.onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;const f=$(`[data-k="${b.dataset.c}"]`,v);if(f.value)copy(f.value,'Dado');else toast('Campo vazio')}}
+
+/* ---------- cofre (criptografia AES-GCM + PBKDF2, tudo no navegador) ---------- */
+const V={key:null,data:null,salt:null,iter:310000,timer:null,q:'',cat:'Todas',shown:new Set()};
+const VCATS=['Redes sociais','Domínio e site','E-mail','Financeiro','Ferramentas','Outros'];
+const VCC={'Redes sociais':'--brand','Domínio e site':'--pos','E-mail':'--acc-ink','Financeiro':'--caut','Ferramentas':'--mut','Outros':'--mut'};
+const b64=a=>{a=new Uint8Array(a);let s='';for(let i=0;i<a.length;i+=0x8000)s+=String.fromCharCode.apply(null,a.subarray(i,i+0x8000));return btoa(s)};
+const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function kdf(pw,salt,iter){const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:iter,hash:'SHA-256'},k,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+async function vEnc(key,obj){const iv=crypto.getRandomValues(new Uint8Array(12));const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(obj)));return{iv:b64(iv),ct:b64(ct)}}
+async function vDec(key,iv,ct){return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(iv)},key,unb64(ct))))}
+async function saveVault(){const e=await vEnc(V.key,V.data);LS.set('cubehub.vault',{v:1,iter:V.iter,salt:V.salt,iv:e.iv,ct:e.ct})}
+const seedEntries=()=>(window.VAULT_SEED||[]).map((e,i)=>({...e,id:'seed'+i+Math.random().toString(36).slice(2,6),updated:Date.now()}));
+async function createVault(pw){const salt=crypto.getRandomValues(new Uint8Array(16));V.salt=b64(salt);V.iter=310000;V.key=await kdf(pw,salt,V.iter);V.data={entries:seedEntries()};await saveVault();bump()}
+async function openVault(pw){const b=LS.get('cubehub.vault',null);const key=await kdf(pw,unb64(b.salt),b.iter);const data=await vDec(key,b.iv,b.ct);V.key=key;V.data=data;V.salt=b.salt;V.iter=b.iter;bump()}
+function lockVault(msg){V.key=null;V.data=null;V.shown.clear();clearTimeout(V.timer);updateVaultState();if(location.hash==='#/cofre')drawVault();if(msg)toast(msg)}
+function bump(){if(!V.key)return;clearTimeout(V.timer);V.timer=setTimeout(()=>lockVault('Cofre bloqueado por inatividade'),300000)}
+function genPw(len=20){const cs='abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%&*-_=+',lim=256-(256%cs.length);let o='';while(o.length<len){const b=crypto.getRandomValues(new Uint8Array(len*2));for(const x of b){if(x<lim&&o.length<len)o+=cs[x%cs.length]}}return o}
+function importVault(){const i=document.createElement('input');i.type='file';i.accept='.json,application/json';i.onchange=async()=>{const f=i.files[0];if(!f)return;try{const j=JSON.parse(await f.text());if(!(j&&j.v===1&&typeof j.salt==='string'&&typeof j.iv==='string'&&typeof j.ct==='string'&&Number.isInteger(j.iter)&&j.iter>=100000&&j.iter<=2000000))throw 0;if(LS.get('cubehub.vault',null)&&!await ask('Importar substitui o cofre que está neste navegador. Continuar?','Importar',true))return;LS.set('cubehub.vault',j);lockVault();drawVault();updateVaultState();toast('Cofre importado. Abra com a senha mestra dele.')}catch(e){toast('Arquivo inválido')}};i.click()}
+async function cofre(v){
+ v.innerHTML=head('Senhas','Cofre','Senhas guardadas com criptografia AES-256 neste navegador, trancadas por uma senha mestra que só você sabe.')+'<div class="wrap" id="vwrap"></div>';drawVault()}
+function drawVault(){
+ const w=$('#vwrap');if(!w)return;
+ if(!(window.crypto&&crypto.subtle)){w.innerHTML='<div class="card"><b>Este contexto não permite criptografia.</b><p style="color:var(--mut)">Abra o arquivo direto do computador ou por um endereço https:// num navegador atual.</p></div>';return}
+ if(!V.key){
+  const has=!!LS.get('cubehub.vault',null);
+  w.innerHTML=has?`<div class="card lock"><h3>Cofre bloqueado</h3><p>Digite a senha mestra para abrir.</p><label class="f">Senha mestra<input class="inp" id="m1" type="password" autocomplete="current-password"></label><div class="msg" id="lmsg" role="alert"></div><button class="btn pri" id="lgo">Desbloquear</button><div class="row"><button class="btn sm" id="limp">Importar cofre de um arquivo</button><button class="btn sm danger" id="lreset">Esqueci a senha</button></div></div>`
+  :`<div class="card lock"><h3>Criar o cofre</h3>${window.VAULT_SEED?'<p>As contas Gmail, Instagram, TikTok e Facebook da Cubby já entram no cofre quando você criar.</p>':''}<p>Escolha uma senha mestra com 12 ou mais caracteres. <b>Se você perder essa senha, o conteúdo não tem como ser recuperado.</b> Anote em um lugar seguro, fora deste computador.</p><label class="f">Senha mestra<input class="inp" id="m1" type="password" autocomplete="new-password"></label><label class="f">Repita a senha<input class="inp" id="m2" type="password" autocomplete="new-password"></label><div class="msg" id="lmsg" role="alert"></div><button class="btn pri" id="lgo">Criar cofre</button><div class="row"><button class="btn sm" id="limp">Já tenho um cofre exportado</button></div></div>`;
+  const m1=$('#m1'),go=$('#lgo'),msg=$('#lmsg');
+  const run=async()=>{msg.textContent='';go.disabled=true;try{
+   if(has){try{await openVault(m1.value)}catch(e){throw new Error('Senha mestra incorreta.')}}
+   else{if(m1.value.length<12)throw new Error('Use 12 ou mais caracteres.');if(m1.value!==$('#m2').value)throw new Error('As duas senhas são diferentes.');await createVault(m1.value)}
+   updateVaultState();drawVault()}catch(e){msg.textContent=e.message;go.disabled=false}};
+  go.onclick=run;$$('input',w).forEach(i=>i.onkeydown=e=>{if(e.key==='Enter')run()});m1.focus();
+  $('#limp').onclick=importVault;
+  const r=$('#lreset');if(r)r.onclick=async()=>{if(await ask('Apagar o cofre inteiro? Sem a senha mestra não há como recuperar as senhas. Só faça isso se tiver certeza de que perdeu a senha e não tem um arquivo exportado.','Apagar tudo',true)){LS.del('cubehub.vault');updateVaultState();drawVault();toast('Cofre apagado')}};
+  return}
+ w.innerHTML=`<div class="vbar"><button class="btn pri" id="vnew">Nova senha</button><input class="inp" id="vq" placeholder="Buscar" aria-label="Buscar" value="${esc(V.q)}">${window.VAULT_SEED?'<button class="btn" id="vseed">Adicionar contas da Cubby</button>':''}<div class="spacer"></div><button class="btn" id="vexp">Exportar cofre</button><button class="btn" id="vimp">Importar</button><button class="btn" id="vlock">Bloquear</button></div><div class="chips" id="vchips"></div><div class="entries" id="vlist"></div><p style="color:var(--mut);font-size:14px;line-height:20px;margin-top:var(--space-4)">O cofre fecha sozinho após 5 minutos parado. O arquivo exportado continua criptografado e só abre com a senha mestra. Para dar acesso ao sócio, mande o arquivo e a senha mestra por canais diferentes.</p>`;
+ $('#vnew').onclick=()=>openEntry();$('#vq').oninput=e=>{V.q=e.target.value;drawEntries()};
+ $('#vexp').onclick=()=>{const b=LS.get('cubehub.vault',null);if(b)dl(new Blob([JSON.stringify(b,null,2)],{type:'application/json'}),`cubby-cofre-${today()}.json`)};
+ $('#vimp').onclick=importVault;const vs=$('#vseed');if(vs)vs.onclick=async()=>{const have=new Set(V.data.entries.map(e=>e.title+'|'+e.user));const add=seedEntries().filter(e=>!have.has(e.title+'|'+e.user));V.data.entries.push(...add);await saveVault();drawEntries();toast(add.length?add.length+' contas adicionadas':'Já estão no cofre')};$('#vlock').onclick=()=>lockVault('Cofre bloqueado');
+ drawEntries()}
+function drawEntries(){
+ const E=V.data.entries,q=V.q.toLowerCase();
+ $('#vchips').innerHTML=['Todas',...VCATS].map(c=>`<button class="chip ${V.cat===c?'on':''}" data-c="${esc(c)}" ${c!=='Todas'?`style="--cc:var(${VCC[c]})"`:''}>${esc(c)}</button>`).join('');
+ $$('#vchips .chip').forEach(b=>b.onclick=()=>{V.cat=b.dataset.c;drawEntries()});
+ const list=E.filter(e=>(V.cat==='Todas'||e.cat===V.cat)&&(!q||[e.title,e.user,e.url,e.notes].join(' ').toLowerCase().includes(q))).sort((a,b)=>a.title.localeCompare(b.title,'pt-BR'));
+ const L=$('#vlist');
+ L.innerHTML=list.length?list.map(e=>{const sh=V.shown.has(e.id),link=/^https?:\/\//i.test(e.url||'')?`<a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">${esc(e.url.replace(/^https?:\/\//,''))}</a>`:esc(e.url||'');
+  return `<div class="entry" data-id="${e.id}"><div><div class="tt">${esc(e.title)}</div><div class="sub">${link}</div><span class="chip" style="--cc:var(${VCC[e.cat]||'--mut'});display:inline-block;margin-top:4px">${esc(e.cat)}</span></div><div class="sub">${esc(e.user||'')} ${e.user?'<button class="btn sm" data-a="cu">copiar</button>':''}</div><div><span class="spec pw">${sh?esc(e.pass):'••••••••••'}</span></div><div class="row"><button class="btn sm" data-a="show">${sh?'ocultar':'ver'}</button><button class="btn sm" data-a="cp">copiar senha</button><button class="btn sm" data-a="ed">editar</button><button class="btn sm danger" data-a="del">apagar</button></div></div>`}).join(''):`<div class="empty">${E.length?'Nada encontrado com esse filtro.':'O cofre está vazio. Clique em “Nova senha” para guardar a primeira.'}</div>`;
+ L.onclick=async ev=>{const b=ev.target.closest('[data-a]');if(!b)return;const id=b.closest('.entry').dataset.id,e=E.find(x=>x.id===id);if(!e)return;
+  if(b.dataset.a==='show'){V.shown.has(id)?V.shown.delete(id):V.shown.add(id);drawEntries()}
+  if(b.dataset.a==='cp')copy(e.pass,'Senha',20000);
+  if(b.dataset.a==='cu')copy(e.user,'Usuário');
+  if(b.dataset.a==='ed')openEntry(id);
+  if(b.dataset.a==='del'&&await ask(`Apagar “${e.title}” do cofre?`,'Apagar',true)){V.data.entries=E.filter(x=>x.id!==id);await saveVault();drawEntries();toast('Apagada')}}}
+let editId=null;
+function openEntry(id){editId=id||null;const e=id?V.data.entries.find(x=>x.id===id):{};
+ $('#entryTitle').textContent=id?'Editar senha':'Nova senha';$('#eTitle').value=e.title||'';$('#eUser').value=e.user||'';$('#ePass').value=e.pass||'';$('#eUrl').value=e.url||'';$('#eNotes').value=e.notes||'';
+ $('#eCat').innerHTML=VCATS.map(c=>`<option ${c===(e.cat||'Outros')?'selected':''}>${c}</option>`).join('');$('#ePass').type='password';$('#eShow').textContent='ver';$('#dlgEntry').showModal()}
+
+/* ---------- login de acesso (porta de entrada; o cofre tem senha mestra própria) ---------- */
+const LOGIN_EMAIL='cubbyoficial@gmail.com';
+async function gate(done){
+ const B=window.LOGIN_BLOB;if(!B||!(window.crypto&&crypto.subtle)){done();return}
+ const o=document.createElement('div');o.id='gate';o.style.cssText='position:fixed;inset:0;z-index:99;display:grid;place-items:center;padding:24px;background:var(--bg);overflow:auto';
+ o.innerHTML=`<form class="card" style="width:min(400px,100%);display:grid;gap:14px" autocomplete="on"><div style="width:190px">${SV('cubby:logotipo').replace('<svg ','<svg style="width:100%;height:auto" ')}</div><div><h1 style="margin:0;font:800 26px/32px var(--display)">Entrar</h1><p style="margin:4px 0 0;color:var(--mut);font-size:14px;line-height:20px">Central da marca Cubby. Acesso só para os sócios.</p></div><label class="f">E-mail<input class="inp" id="gEm" type="email" autocomplete="username" required></label><label class="f">Senha<input class="inp" id="gPw" type="password" autocomplete="current-password" required></label><div class="msg" id="gMsg" role="alert"></div><button class="btn pri" id="gGo" type="submit">Entrar</button></form>`;
+ document.body.appendChild(o);$('#gEm').focus();let fails=0;
+ o.querySelector('form').onsubmit=async ev=>{ev.preventDefault();const go=$('#gGo'),m=$('#gMsg');go.disabled=true;m.textContent='';
+  try{const key=await kdf($('#gEm').value.trim().toLowerCase()+'\n'+$('#gPw').value,unb64(B.salt),B.iter);const seed=await vDec(key,B.iv,B.ct);
+   window.VAULT_SEED=seed.accounts&&seed.accounts.length?seed.accounts:null;o.remove();done()}
+  catch(e){fails++;await new Promise(r=>setTimeout(r,Math.min(4000,600*fails)));m.textContent='E-mail ou senha incorretos.';go.disabled=false;$('#gPw').select()}}}
+
+/* ---------- roteador e inicialização ---------- */
+const PAGES={home,logos,paleta,tipografia,regras,cubby:logos,dados,cofre};
+async function route(){
+ const id=(location.hash.replace(/^#\/?/,'')||'home'),fn=PAGES[id]?id:'home',v=$('#view');
+ v.innerHTML='';v.onclick=null;v.onchange=null;v.oninput=null;
+ try{await PAGES[fn](v)}catch(e){console.error(e);v.innerHTML=`<div class="wrap"><div class="card"><b>Não consegui abrir esta página.</b><p class="msg">${esc(e.message)}</p></div></div>`}
+ renderNav(fn);const info=PAGEINFO[fn];$('#crumb').innerHTML=info?`${CATL[info.cat]} / <b>${info.label}</b>`:'<b>Início</b>';
+ updateVaultState();$('main').scrollTop=0}
+function boot(){
+ applyTheme();
+ $('#themeSeg').onclick=e=>{const b=e.target.closest('button');if(!b)return;LS.set('cubehub.theme',b.dataset.t);applyTheme()};
+ const app=$('#app');if(innerWidth<860)app.classList.add('nosb');
+ $('#toggleSide').onclick=()=>app.classList.toggle('nosb');
+ $('#btnLock').onclick=()=>lockVault('Cofre bloqueado');$('#btnOut').onclick=()=>location.reload();
+ $('#protoTxt').textContent='Dados e arquivos ficam só neste navegador, nada vai para servidor.'+(PERSIST?'':' Atenção: o armazenamento do navegador está bloqueado, então nada será salvo.');
+ $('#protoX').onclick=()=>$('#protoBar').remove();
+ $('#eShow').onclick=()=>{const i=$('#ePass'),s=i.type==='password';i.type=s?'text':'password';$('#eShow').textContent=s?'ocultar':'ver'};
+ $('#eGen').onclick=()=>{$('#ePass').value=genPw(20);$('#ePass').type='text';$('#eShow').textContent='ocultar'};
+ $('#eCancel').onclick=()=>$('#dlgEntry').close();
+ $('#entryForm').addEventListener('submit',async ev=>{ev.preventDefault();
+  const o={id:editId||Date.now().toString(36)+Math.random().toString(36).slice(2,7),title:$('#eTitle').value.trim(),user:$('#eUser').value.trim(),pass:$('#ePass').value,url:$('#eUrl').value.trim(),cat:$('#eCat').value,notes:$('#eNotes').value.trim(),updated:Date.now()};
+  if(!o.title||!o.pass)return;
+  const E=V.data.entries,i=E.findIndex(x=>x.id===o.id);if(i>=0)E[i]=o;else E.push(o);
+  try{await saveVault();$('#dlgEntry').close();drawEntries();toast('Salvo')}catch(e){toast('Erro ao salvar: '+e.message)}});
+ ['pointerdown','keydown'].forEach(t=>document.addEventListener(t,bump,true));
+ addEventListener('hashchange',()=>{if(innerWidth<860)app.classList.add('nosb');route()});
+ route()}
+gate(boot);
+</script>
+</body>
+</html>
